@@ -1,5 +1,5 @@
-# ardupilot-nav-scripts
-Navigation Scripts to Maneuver an Ardupilot Copter through a Virtual Maze Enviornment.
+# ardupilot-ros-navigation-scripts
+Navigation Scripts to Maneuver an Ardupilot Copter, and map, through a Virtual Maze Enviornment using built in Odometry, GPS, and an integrated LiDAR.
 
 Acronyms:
 SITL: Software In The Loop
