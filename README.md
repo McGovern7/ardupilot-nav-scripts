@@ -1,7 +1,8 @@
-# ardupilot-ros-navigation-scripts
+2# ardupilot-ros-navigation-scripts
 Navigation Scripts to Maneuver an Ardupilot Copter, and map, through a Virtual Maze Enviornment using built in Odometry, GPS, and an integrated LiDAR.
 
 ## INSTALLATION
+Recommended Installation Video [Here](https://www.youtube.com/watch?v=2BhyKyzKAbM)
 
 ### Software Requirements
 - ROS Humble
@@ -13,12 +14,15 @@ Navigation Scripts to Maneuver an Ardupilot Copter, and map, through a Virtual M
 - cartographer_ros
 - ardupilot_ros PR - "WIP: add integration with nav2"
 
-Acronyms:
-**SITL**: Software In The Loop
-**SLAM**: Simultaneous Localization and Mapping
-**LiDAR**: Light Detection And Ranging
-
 ## Project Description
+
+### Acronyms:
+
+**SITL**: Software In The Loop
+
+**SLAM**: Simultaneous Localization and Mapping
+
+**LiDAR**: Light Detection And Ranging
 
 This Project’s goal is to build a deep understanding of the necessary environments, software packages, and communication networks to introduce myself to the field of autonomous robot navigation using LiDAR.  To do this, I will build off from the following open source tools to set up a SITL 3D simulation of an Ardupilot Copter capable of SLAM using:
 
@@ -33,9 +37,13 @@ This project’s workspace branches from the ardupilot_ros pull request which in
 
 The two scripts are:
 - [Wanderer](./wanderer.py): copter moves forward and maps the environment, yawing when it gets too close to a wall
-- [Wall_follower](./wall_follower): copter maneuvers through the maze environment using the left/right hand rule
+- [Wall_Follower](./wall_follower.py): copter maneuvers through the maze environment using the left/right hand rule
 
 ## Project Architecture
+
+### Drone Communication Chart
+
+### Video Demonstration
 
 ### What I’ve learned
 - ROS2 robotics software library
@@ -43,9 +51,12 @@ The two scripts are:
 - Dual booting my computer, ubuntu terminal architecture
 - The hardware and software used in an automated drone, and their communication protocols
 - Basic drone avionics
+- The importance of Computation Thinking to solve seemingly insurmountable problems piece by piece
 
 ### Downside of current project and what to work on next
-next: Purchase a pixhawk4 & RPLidarA2. In order to integrate Ros's Nav2 feature with an ardupilot robot, a physical companion computer is required for the following reason. Nav2 requires that the robot be localized from cartographer's information before it can function. In order to accomplish this, the flight controller needs to be transitioned from GPS to non-GPS navigation by changing the EKF source parameters to ExternalNAV. Ardupilot's EKF (Extended Kalman Filter) is responsible for estimating vehicle position. Cartographer's data is only deemed reliable by the EKF filter if it's sent through a Data Distribution Service from the companion computer hardware, which itself gets its odometry data from physical devices like lidar.
+Next: Purchase a pixhawk4 & RPLidarA2. 
+
+In order to totally integrate Ros's Nav2 feature with an ardupilot robot, a physical companion computer is required for the following reason. Nav2 requires that the robot be localized from Cartographer's information before it can function. In order to accomplish this, Cartographer's information needs to be written into Ardupilot's EKF Filter.  This is done by transitioning the Flight Controller's source parameters from GPS to ExternalNAV. Ardupilot's EKF (Extended Kalman Filter) is responsible for estimating vehicle position. Cartographer's data is only deemed reliable by the EKF filter if it's sent through a Data Distribution Service from the companion computer hardware, which itself gets its odometry data from physical devices like lidar.
 
 Understanding why Nav2 wasn't working by unwinding this knot of requirements took longer than I'd care to admit. However, using computational thinking by teaching myself about
 1: the Nav2 requirements (Navigation, Localization, Feedback)
