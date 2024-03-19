@@ -1,6 +1,6 @@
 # ardupilot-ros-navigation-scripts
 
-Navigation Scripts to Maneuver an Ardupilot Copter, and map, through a Virtual Maze Enviornment using built in Odometry, GPS, and an integrated LiDAR.
+Navigation Scripts to Maneuver an Ardupilot Copter, and map, through a Virtual Maze Environment using built in Odometry, GPS, and an integrated LiDAR.
 
 ## INSTALLATION
 Recommended Installation Video [Here](https://www.youtube.com/watch?v=2BhyKyzKAbM)
