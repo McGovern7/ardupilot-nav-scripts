@@ -19,13 +19,11 @@ Recommended Installation Video [Here](https://www.youtube.com/watch?v=2BhyKyzKAb
 
 ### Acronyms:
 
-**SITL**: Software In The Loop
+- **SITL**: Software In The Loop
+- **SLAM**: Simultaneous Localization and Mapping
+- **LiDAR**: Light Detection And Ranging
 
-**SLAM**: Simultaneous Localization and Mapping
-
-**LiDAR**: Light Detection And Ranging
-
-This Project’s goal is to build a deep understanding of the necessary environments, software packages, and communication networks to introduce myself to the field of autonomous robot navigation using LiDAR.  To do this, I will build off from the following open source tools to set up a SITL 3D simulation of an Ardupilot Copter capable of SLAM using:
+This Project’s goal is to build a deep understanding of the environments, software packages, and communication networks necessary to introduce myself to the field of autonomous robot navigation using LiDAR.  To do this, I will build off from the following open source tools to set up a SITL 3D simulation of an Ardupilot Copter capable of SLAM using:
 
 - Ardupilot SITL for the simulated 3D copter 
 - Gazebo Garden for the simulation and 3D maze environment
