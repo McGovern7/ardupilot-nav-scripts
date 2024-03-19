@@ -1,4 +1,5 @@
-2# ardupilot-ros-navigation-scripts
+# ardupilot-ros-navigation-scripts
+
 Navigation Scripts to Maneuver an Ardupilot Copter, and map, through a Virtual Maze Enviornment using built in Odometry, GPS, and an integrated LiDAR.
 
 ## INSTALLATION
@@ -64,8 +65,4 @@ Understanding why Nav2 wasn't working by unwinding this knot of requirements too
 3: Editing Ardupilot's EKF parameters (via mavlink)
 4: DDS middleware protocol & the ROS2 environment
 5: the role of a robot's companion computer
-gave me a far greater understanding of robotics and autonomous navigation, which I would have ever discovered if I had mindlessly followed a tutorial.
-
-While much of the source code is capable of being run in a virtual environment, Ardupilot's Extended Kalman Filter unfortunately needs a companion computer to switch
-
-This hardware is needed to create a companion computer which will handle the topics which utilize DDS-XRCE communication.
+gave me a understanding of robotics systems and autonomous navigation far greater than I would have gotten if I had mindlessly followed a tutorial.
