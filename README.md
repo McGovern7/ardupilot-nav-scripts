@@ -4,7 +4,7 @@
 Navigation Scripts to Maneuver an Ardupilot Copter, and map, through a Virtual Maze Environment using built in Odometry, GPS, and an integrated LiDAR.
 
 ## DESCRIPTION
-This project’s workspace branches from the ardupilot_ros pull request which integrates ROS2’s Nav2 feature.  This project’s scope involves the creation of two Python scripts which use the same ROS2 sensor data to maneuver the drone in a 3D maze using different navigation logic. 
+This project’s workspace branches from the ardupilot_ros pull request which integrates ROS2’s Nav2 feature.  This project’s scope involves the creation of two Python scripts which use the ROS2 LaserScan data to maneuver the drone in a 3D maze using different navigation logic. 
 
 ## INSTALLATION
 Recommended Installation Video [Here](https://www.youtube.com/watch?v=2BhyKyzKAbM)
