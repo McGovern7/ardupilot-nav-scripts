@@ -33,14 +33,31 @@ The architecture starts with a SITL ArduCopter integrated with a LiDAR in a ROS 
 
 A basic diagram of the how the 2 scripts interact with Ardupilot’s Communication Protocol [here](Robot_Architecture.png)
 
-### Visualising the Nav Process: [wanderer.py](../wanderer.py)
-Once Copter is hovering, call pos_script
-  def pos_script
-Unless the program is quit, call forward_until_obstacle. Otherwise, loop indefinitely
-  def forward_until_obstacle
-While check_lidar() remains true, move forward indefinitely. Otherwise, set velocity to 0 and exit function, calling yaw_to_open on line 255
-  def yaw_to_open
-Yaw in the direction closest to an opening, making sure the copter does not pitch back into the same wall after rotating. Exit function and return back to the while loop in pos_script, where once again forward_until_obstacle and yaw_to_opening are called in sequence until the user exits the program.
+### Visualising the Nav Process in the First Pass: [wanderer.py](../wanderer.py)
+
+Once Connection is established and the Drone is hovering, call ```pos_script()```
+
+<div align="center">
+  <img src="https://github.com/McGovern7/ardupilot-nav-scripts/assets/98053643/d8c5b569-250f-46ba-accb-059936c3ef0e"
+    width="600"
+    height="290"/>
+</div>
+
+Unless the program is quit, call ```forward_until_obstacle()```
+<div align="center">
+  <img src="https://github.com/McGovern7/ardupilot-nav-scripts/assets/98053643/0a377d07-0401-4f23-ad57-620daa47844f"
+    width="600"
+    height="200"/>
+</div>
+
+While check_lidar() remains true, move forward indefinitely. Once check_lidar returns false (front LiDAR ranges too close), set velocity = 0 and exit function, calling ```yaw_to_open()```
+<div align="center">
+  <img src="https://github.com/McGovern7/ardupilot-nav-scripts/assets/98053643/6c58fcbf-8bb0-4d86-89e9-278bd1e04a13"
+    width="900"
+    height="500"/>
+</div>
+
+Yaw in the direction closest to an opening, making sure the copter does not pitch back into the same wall after rotating. Exit function and return back to the while loop in ```pos_script()```, where once again ```forward_until_obstacle()``` and ```yaw_to_opening()``` are called in sequence until the user exits the program.
 
 ### Visualising the Nav Process: [wall_follower.py](../wall_follower.py)
 
