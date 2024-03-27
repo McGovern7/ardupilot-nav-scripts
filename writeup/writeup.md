@@ -35,7 +35,7 @@ A basic diagram of the how the 2 scripts interact with Ardupilot’s Communicati
 
 ### Visualising the Nav Process in the First Pass: [wanderer.py](../wanderer.py)
 
-Once Connection is established and the Drone is hovering, call ```pos_script()```
+1. Once Connection is established and the Drone is hovering, call ```pos_script()```
 
 <div align="center">
   <img src="https://github.com/McGovern7/ardupilot-nav-scripts/assets/98053643/d8c5b569-250f-46ba-accb-059936c3ef0e"
@@ -43,24 +43,29 @@ Once Connection is established and the Drone is hovering, call ```pos_script()``
     height="290"/>
 </div>
 
-Unless the program is quit, call ```forward_until_obstacle()```
+2. Unless the program is quit, call ```forward_until_obstacle()```
 <div align="center">
   <img src="https://github.com/McGovern7/ardupilot-nav-scripts/assets/98053643/0a377d07-0401-4f23-ad57-620daa47844f"
     width="600"
     height="200"/>
 </div>
 
-While check_lidar() remains true, move forward indefinitely. Once check_lidar returns false (front LiDAR ranges too close), set velocity = 0 and exit function, calling ```yaw_to_open()```
+3. While ```check_lidar()``` remains true, move forward indefinitely. Once ```check_lidar() = false``` (front LiDAR ranges too close), set ```velocity = 0``` and exit function, calling ```yaw_to_open()```
 <div align="center">
   <img src="https://github.com/McGovern7/ardupilot-nav-scripts/assets/98053643/6c58fcbf-8bb0-4d86-89e9-278bd1e04a13"
     width="900"
     height="500"/>
 </div>
 
-Yaw in the direction closest to an opening, making sure the copter does not pitch back into the same wall after rotating. Exit function and return back to the while loop in ```pos_script()```, where once again ```forward_until_obstacle()``` and ```yaw_to_opening()``` are called in sequence until the user exits the program.
+4. Yaw in the direction closest to an opening, ensuring the copter does not pitch straight back into the same wall with some trig calculations.
+5. Exit function and return back to the while loop in ```pos_script()```, where once again ```forward_until_obstacle()``` and ```yaw_to_opening()``` are called in sequence until the user exits the program.
 
 ### Visualising the Nav Process: [wall_follower.py](../wall_follower.py)
 
+1. Once Connection is established, prompt the user to navigate the maze using the *right-hand rule* or *left-hand rule*. The program then yaws to hug the wall from the correct side, and begins navigation by calling ```escape_maze()```
+2. Unless the program is quit, call ```forward_until_snag()```
+3. Pitch forward indefinitely with ```velocity = 1``` until the copter is either obstructed by a forward wall, or no longer hugging the wall designated by the user to follow. Either case stops the copter and exits the function, where the script then calls ```yaw_to_opening()```
+4. A truth table now determines the required movements to clear the three scenarios
 
 ### Demonstration
 
