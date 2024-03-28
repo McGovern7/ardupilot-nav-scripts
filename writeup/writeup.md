@@ -31,7 +31,7 @@ The two scripts are:
 The scripts showcase the numerous ways to navigate a drone using a LiDAR and GPS.  This allows the flight controller to receive intelligent navigation commands without a companion computer, which costs hundreds of dollars.  
 The architecture starts with a SITL ArduCopter integrated with a LiDAR in a ROS 2 Repository. The Copter is also integrated with Cartographer, allowing the LidAR information to map its whereabouts. Using a virtual MatekB405-Wing as the flight controller, 
 
-A basic diagram of the how the 2 scripts interact with Ardupilot’s Communication Protocol [here](robot_architecture.png)
+A basic diagram of the how the 2 scripts interact with Ardupilot’s Communication Protocol [here](Images/robot_architecture.png)
 
 ### Visualising the Nav Process in the First Pass: [wanderer.py](../wanderer.py)
 
@@ -74,16 +74,15 @@ A basic diagram of the how the 2 scripts interact with Ardupilot’s Communicati
 |    0    |    1    |
 |    1    |    1    |
 
-4A. For the {0, 0} case, turn 90 deg counter clockwise, now right-hugging the forward wall 
-4B. For the {0, 1} case, turn 180 deg around
-4C. For the {1, 1} case, turn 90 deg clockwise, now facing another decision
+ > 4A. For the {0, 0} case, turn 90 deg counter clockwise, now right-hugging the forward wall 
+ > 4B. For the {0, 1} case, turn 180 deg around
+ > 4C. For the {1, 1} case, turn 90 deg clockwise, now facing another decision
 
-- For the {1, 1}, the copter must now determine if there is a right wall perpendicular to the passed corner using LiDAR
-- If there is, move forward until the copter begins hugging the wall, then call ```forward_until_snag```
+>  - For the {1, 1}, the copter must now determine if there is a right wall perpendicular to the passed corner using LiDAR
+>  - If there is, move forward until the copter begins hugging the wall, then call ```forward_until_snag()```
+>  - If there is **not**, the copter must move forward to clear the thin wall, yaw 90 degrees clockwise, move forward until the copter begins hugging the wall, and then call ```forward_until_snag()```
   
-The following is a visualization of the possible obstacles
-
-6. 
+[Here](Images/truth_table.png) is a visualization of the obstacle types and the position of the copter before and after maneuvering them.
 
 ### Demonstration
 
@@ -96,7 +95,7 @@ The following is a visualization of the possible obstacles
 - The importance of Computation Thinking to solve seemingly insurmountable problems piece by piece
 - Contributing to an open source software library 
 
-### Downside of current project and what to work on next
+### What to Work on in the Future
 Next: Purchase a pixhawk4 & RPLidarA2.
 
 In order to totally integrate ROS 2's Nav2 feature with an Ardupilot robot, a physical companion computer is required for the following reason. Nav2 requires that the robot be localized from Cartographer's information before it can function. In order to accomplish this, Cartographer's information needs to be written into Ardupilot's EKF Filter.  This is done by transitioning the Flight Controller's source parameters from GPS to ExternalNAV. Ardupilot's EKF (Extended Kalman Filter) is responsible for estimating vehicle position. Cartographer's data is only deemed reliable by the EKF filter if it's sent through a Data Distribution Service from the companion computer hardware, which itself gets its odometry data from physical devices like lidar.
