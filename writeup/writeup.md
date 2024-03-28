@@ -67,16 +67,22 @@ A basic diagram of the how the 2 scripts interact with Ardupilot’s Communicati
 3. Pitch forward indefinitely with ```velocity = 1``` until the copter is either obstructed by a forward wall, no longer hugging the wall designated by the user to follow, or both. Any of these obstrutions stops the copter and exits the function, where the script then calls ```yaw_to_opening()```
 4. A truth table now determines the required movements to clear the three scenarios. The following using right-hand rule navigation.
 
-Key: {0: LiDAR range < 1.4m, 1: LiDAR range > 1.4m}
-| Fwd Rng | Rt Rng  |
+```Key: {0: LiDAR range < 1.4m, 1: LiDAR range > 1.4m}```
+| Forward Range | Right Range  |
 | ------- | ------- |
-|    0    |    0    | - yaw 90 deg clockwise
-|    1    |    1    | - yaw 90 deg counter-clockwise
-|    0    |    1    | - yaw 90 deg counter-clockwise (impossible case considering maze dimensions)
+|    0    |    0    |
+|    0    |    1    |
+|    1    |    1    |
 
-4A. For the {0, 0} case, another truth table is needed to determine the next course of action
+4A. For the {0, 0} case, turn 90 deg counter clockwise, now right-hugging the forward wall 
+4B. For the {0, 1} case, turn 180 deg around
+4C. For the {1, 1} case, turn 90 deg clockwise, now facing another decision
 
-The following 
+- For the {1, 1}, the copter must now determine if there is a right wall perpendicular to the passed corner using LiDAR
+- If there is, move forward until the copter begins hugging the wall, then call ```forward_until_snag```
+  
+The following is a visualization of the possible obstacles
+
 6. 
 
 ### Demonstration
@@ -102,4 +108,3 @@ Understanding why Nav2 wasn't working by unwinding this knot of requirements too
 3. Editing Ardupilot's EKF parameters (via MAVProxy)
 4. DDS middleware protocol & the ROS 2 environment
 5. The role of a robot's companion computer gave me an understanding of robotics systems and autonomous navigation far greater than I would have gotten if I had mindlessly followed a tutorial
-
