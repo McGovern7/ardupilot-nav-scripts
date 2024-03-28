@@ -64,8 +64,20 @@ A basic diagram of the how the 2 scripts interact with Ardupilot’s Communicati
 
 1. Once Connection is established, prompt the user to navigate the maze using the *right-hand rule* or *left-hand rule*. The program then yaws to hug the wall from the correct side, and begins navigation by calling ```escape_maze()```
 2. Unless the program is quit, call ```forward_until_snag()```
-3. Pitch forward indefinitely with ```velocity = 1``` until the copter is either obstructed by a forward wall, or no longer hugging the wall designated by the user to follow. Either case stops the copter and exits the function, where the script then calls ```yaw_to_opening()```
-4. A truth table now determines the required movements to clear the three scenarios
+3. Pitch forward indefinitely with ```velocity = 1``` until the copter is either obstructed by a forward wall, no longer hugging the wall designated by the user to follow, or both. Any of these obstrutions stops the copter and exits the function, where the script then calls ```yaw_to_opening()```
+4. A truth table now determines the required movements to clear the three scenarios. The following using right-hand rule navigation.
+
+Key: {0: LiDAR range < 1.4m, 1: LiDAR range > 1.4m}
+| Fwd Rng | Rt Rng  |
+| ------- | ------- |
+|    0    |    0    | - yaw 90 deg clockwise
+|    1    |    1    | - yaw 90 deg counter-clockwise
+|    0    |    1    | - yaw 90 deg counter-clockwise (impossible case considering maze dimensions)
+
+4A. For the {0, 0} case, another truth table is needed to determine the next course of action
+
+The following 
+6. 
 
 ### Demonstration
 
