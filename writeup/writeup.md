@@ -1,19 +1,20 @@
 # PROJECT WRITE UP
 
-### Acronyms:
+## 0.1 Acronyms:
 - **SITL**: Software In The Loop
 - **SLAM**: Simultaneous Localization and Mapping
 - **LiDAR**: Light Detection And Ranging
 - **GCS**: Ground Control Station
 - **EKF**: Extended Kalman Filter
 
-## Precursor 
-This Project’s goal for me as a software engineer, is to build a deep understanding of the environments, software packages, and communication networks necessary to introduce myself to the field of Autonomous Robot Navigation using LiDAR.  
+## 0.2 Precursor 
+This Project’s goal, for me as a software engineer, was to build a deep understanding of the environments, software packages, and communication networks necessary to introduce myself to the field of Autonomous Robot Navigation. I began this project without a concrete goal in mind, because I had no prior experience with robotics or Linux. To start, I researched the basics of robotics and programmable drones, so I could then decide on a challenging, yet achievable project idea. I originally planned on using [This](https://github.com/ArduPilot/ardupilot_ros/pull/11) PR, integrating Nav2 with Ardupilot, to control Nav2 with Python(using the Simple Commander API). Howver, for the reasons discussed in ```3.2```, I needed to find an alternative idea.
 
-In preparation of this project, I have completed up to the advanced section of the ROS 2 Humble [Tutorial](https://docs.ros.org/en/humble/Tutorials/Intermediate.html), [This](https://www.udemy.com/course/ros2-nav2-stack/learn/lecture/35699436#overview) Udemy course covering the Nav 2 stack, and watched some Intelligent Quad YouTube [videos](https://www.youtube.com/@IntelligentQuads) relevant to my project.
+## 1.1 Description
 
-## Description
-For the environment, I will build off from the following open source tools to set up a 3D simulation of a SITL Ardupilot Copter capable of SLAM using:
+After considering my hardware constraints, I decided on using LiDAR and PyMavlink to create my own autonomous drone navigation software. I used Agile Development to iteratively discover, learn about, and then implement the different phases of my project. 
+
+For the environment, I built off from the following open source tools to set up a 3D simulation of a SITL Ardupilot Copter capable of SLAM using:
 
 - Ardupilot SITL for the simulated 3D copter
 - Gazebo Garden for the simulation and 3D maze environment
@@ -28,13 +29,13 @@ The two scripts are:
 - [Wanderer](../wanderer.py): copter moves forward and maps the environment, yawing when it gets too close to a wall
 - [Wall_Follower](../wall_follower.py): copter maneuvers through the maze environment using the left/right hand rule
 
-# Project Architecture
+## 1.2 Project Architecture
 The scripts showcase the numerous ways to navigate a drone using a LiDAR and GPS.  This allows the flight controller to receive intelligent navigation commands without a companion computer, which costs hundreds of dollars.  
 The architecture starts with a SITL ArduCopter integrated with a LiDAR in a ROS 2 Repository. The Copter is also integrated with Cartographer, allowing the LidAR information to map its whereabouts. Using a virtual MatekB405-Wing as the flight controller, 
 
 A basic diagram of the how the 2 scripts interact with Ardupilot’s Communication Protocol [here](Images/robot_architecture.png)
 
-## Visualising the Nav Process in the First Pass: [wanderer.py](../wanderer.py)
+## 2.1 Visualising the Nav Process in the First Pass: [wanderer.py](../wanderer.py)
 
 1. Once Connection is established using PyMavlink commands and the Drone is hovering, call ```pos_script()```
 
@@ -62,7 +63,7 @@ A basic diagram of the how the 2 scripts interact with Ardupilot’s Communicati
 4. Yaw in the direction closest to an opening, ensuring the copter does not pitch straight back into the same wall with some trig calculations.
 5. Exit function and return back to the while loop in ```pos_script()```, where once again ```forward_until_obstacle()``` and ```yaw_to_opening()``` are called in sequence until the user exits the program.
 
-## Visualising the Nav Process: [wall_follower.py](../wall_follower.py)
+## 2.2 Visualising the Nav Process: [wall_follower.py](../wall_follower.py)
 
 1. Once Connection is established using PyMavlink commands, prompt the user to navigate the maze using the *right-hand rule* or *left-hand rule*. The program then yaws to hug the wall from the correct side, and begins navigation by calling ```escape_maze()```
 2. Unless the program is quit, call ```forward_until_snag()```
@@ -86,10 +87,10 @@ A basic diagram of the how the 2 scripts interact with Ardupilot’s Communicati
   
 [Here](Images/truth_table.png) is a visualization of the obstacle types and the position of the copter before and after maneuvering them.
 
-# Demonstration
+## 2.3 Demonstration
 [Watch](https://www.youtube.com/watch?v=yl9bG-J0TVU) a short video demonstrating the subsequent runnings of the wall_follower and wanderer script.
 
-## What I’ve learned
+## 3.1 What I’ve learned
 - ROS 2 robotics software library
 - The ROS 2 software package NAV2, learned through online course
 - Dual booting my computer with Windows and ubuntu
@@ -99,7 +100,7 @@ A basic diagram of the how the 2 scripts interact with Ardupilot’s Communicati
 - The importance of Computation Thinking to solve convoluted problems piece by piece
 - Contributing to an open source software library 
 
-### What to Work on in the Future
+## 3.2 What to Work on in the Future
 - Purchase a pixhawk4 & RPLidarA2, so I can use Nav2 programatically with an Ardupilot Drone.
 - Use the code I've written with a self-built drone to navigate real-life environemts.
 
@@ -114,5 +115,8 @@ Understanding why Nav2 wasn't working by unwinding this knot of requirements too
 3. Editing Ardupilot's EKF parameters (via MAVProxy)
 4. DDS middleware protocol & the ROS 2 environment
 5. The role of a robot's companion computer
+
+## Sources
+Throughout my project's timespan, I have completed up to the advanced section of the ROS 2 Humble [Tutorial](https://docs.ros.org/en/humble/Tutorials/Intermediate.html), [This](https://www.udemy.com/course/ros2-nav2-stack/learn/lecture/35699436#overview) Udemy course covering the Nav 2 stack, and watched some Intelligent Quad YouTube [videos](https://www.youtube.com/@IntelligentQuads) relevant to my project.
 
 This understanding is far depper than one gained by simply watching a tutorial of an expert. Making mistakes, identifying the mistakes, and determining their solutions by oneself is key to becoming an effective software engineer.
