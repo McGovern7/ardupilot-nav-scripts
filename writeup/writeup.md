@@ -14,6 +14,14 @@ This Project’s goal, for me as a software engineer, was to build a deep unders
 
 After considering my hardware constraints, I decided on using LiDAR and PyMavlink to create my own autonomous drone navigation software. I used Agile Development to iteratively discover, learn about, and then implement the different phases of my project. 
 
+This project’s workspace builds from the ardupilot_ros pull request which integrates ROS 2’s Nav2 feature.  This project’s scope involves the creation of two Python scripts which use the same ROS 2 LiDAR data to maneuver the drone in a 3D maze using different navigation logic.
+
+The two scripts I programmed:
+- [Wanderer](../wanderer.py): copter moves forward and maps the environment, yawing when it gets too close to a wall
+- [Wall_Follower](../wall_follower.py): copter maneuvers through the maze environment using the left/right hand rule
+
+The scripts showcase some of the numerous ways to navigate a drone using only LiDAR, GPS, and Odometry. My scripts allow the flight controller to receive intelligent navigation commands without a companion computer, which costs hundreds of dollars.  
+
 For the environment, I built off from the following open source tools to set up a 3D simulation of a SITL Ardupilot Copter capable of SLAM using:
 
 - Ardupilot SITL for the simulated 3D copter
@@ -23,14 +31,7 @@ For the environment, I built off from the following open source tools to set up 
 - A virtual MatekF405-Wing as the Flight Controller, integrated with the GCS MavProxy (Any board capable of SITL should work)
 - PyMavlink to communicate between the ROS 2 topics and the drone’s base_link in my scripts
 
-This project’s workspace branches from the ardupilot_ros pull request which integrates ROS 2’s Nav2 feature.  This project’s scope involves the creation of two Python scripts which use the same ROS 2 sensor data to maneuver the drone in a 3D maze using different navigation logic.
-
-The two scripts are:
-- [Wanderer](../wanderer.py): copter moves forward and maps the environment, yawing when it gets too close to a wall
-- [Wall_Follower](../wall_follower.py): copter maneuvers through the maze environment using the left/right hand rule
-
 ## 1.2 Project Architecture
-The scripts showcase the numerous ways to navigate a drone using a LiDAR and GPS.  This allows the flight controller to receive intelligent navigation commands without a companion computer, which costs hundreds of dollars.  
 The architecture starts with a SITL ArduCopter integrated with a LiDAR in a ROS 2 Repository. The Copter is also integrated with Cartographer, allowing the LidAR information to map its whereabouts. Using a virtual MatekB405-Wing as the flight controller, 
 
 A basic diagram of the how the 2 scripts interact with Ardupilot’s Communication Protocol [here](Images/robot_architecture.png)
