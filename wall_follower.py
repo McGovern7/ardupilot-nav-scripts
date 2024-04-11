@@ -6,8 +6,10 @@ from sensor_msgs.msg import LaserScan
 from pymavlink import mavutil
 import time
 
+INIT_TIME = 0.5
 ARM_TIME = 0.5
 TAKEOFF_TIME = 5
+TAKEOFF_HEIGHT = 2.5
 WALL_DIST = 1.4 # acceptable distance from wall
 LAND_TIME = 3
 
@@ -49,15 +51,14 @@ class Copter(object):
         self.state = CopterState.stable
         self.stop_wander = False
         self.hand_rule = None
-        self.heading = 0
+        self.heading = 90.0
 
-    '''
-    Initialize Function: Set up the Copter for guided flight (phase 1)
-    '''
-    def initialize(self):
+    def initialize(self) -> None:
+        '''
+        Initialize Function: Connect copter to Mavlink, and set flight state to guided (phase 1)
+        '''
         self.vehicle = mavutil.mavlink_connection('udpin:localhost:14551') # connect to localhost 14551
         self.vehicle.wait_heartbeat()
-        # set mode to guided
         if self.state != CopterState.guided:
             self.vehicle.mav.command_long_send(self.vehicle.target_system, self.vehicle.target_component, 176, 0, 1, 4, 0, 0, 0, 0, 0)
             time.sleep(0.25)
@@ -65,115 +66,91 @@ class Copter(object):
             
             self.state = CopterState.guided
             print("__initialized__")
-            time.sleep(0.5)
-            self.arm() # move to next phase of launch
+            time.sleep(INIT_TIME)
 
-    '''
-    Arm Function: Arm the Copter for takeoff (phase 2)
-    '''
-    def arm(self):
+    def arm(self) -> None:
+        '''
+        Arm Function: Arm the Copter for takeoff (phase 2)
+        '''
         self.vehicle.mav.command_long_send(self.vehicle.target_system, self.vehicle.target_component, 
-                                    mavutil.mavlink.MAV_CMD_COMPONENT_ARM_DISARM, 0, 1, 0, 0, 0, 0, 0, 0) # arm copter
+                                    mavutil.mavlink.MAV_CMD_COMPONENT_ARM_DISARM, 0, 1, 0, 0, 0, 0, 0, 0)
         
         print("__armed__")
         time.sleep(ARM_TIME)
-        self.takeoff(2.5) # move to next phase of launch
 
-    '''
-    Takeoff Function: Set the Copter to takeoff to a desired height (phase 3)
-    Params: pos_z | desired height
-    '''
-    def takeoff(self, pos_z):
+    def takeoff(self, pos_z: float) -> None:
+        '''
+        Takeoff Function: Set the Copter to takeoff to a desired height (phase 3)
+        Args: 
+            pos_z (float): desired height
+        '''
         self.vehicle.mav.command_long_send(self.vehicle.target_system, self.vehicle.target_component, 
                                     mavutil.mavlink.MAV_CMD_NAV_TAKEOFF, 0, 0, 0, 0, 0, 0, 0, pos_z)
         
         print("__taking off__")
         time.sleep(TAKEOFF_TIME)
 
-    '''
-    Land Fuction: Land the copter where it hovers 
-    '''
-    def land(self):
+    def land(self) -> None:
+        '''
+        Land Fuction: Land the copter from where it hovers 
+        '''
         if self.state == CopterState.guided:
             print("__landing__")
             self.vehicle.mav.command_long_send(self.vehicle.target_system, self.vehicle.target_component, 176, 0, 1, 9, 0, 0, 0, 0, 0)
 
             self.state == CopterState.land
 
-    """
-    Position Function: set copter's target position, exit function when waypoint distance has been met
-    Params: pos_x, pos_y, pos_z | (x,y,z) coordinates of desired location
-    """
-    def position(self, pos_x, pos_y, pos_z):
-        print("To Position: ({:0.1f},{:0.1f},{:0.1f})".format(pos_x, pos_y, pos_z))
-
-        self.vehicle.mav.send(mavutil.mavlink.MAVLink_set_position_target_local_ned_message(10, self.vehicle.target_system, self.vehicle.target_component, mavutil.mavlink.MAV_FRAME_BODY_OFFSET_NED, int(0b110111111000), pos_x, pos_y, pos_z, 0, 0, 0, 0, 0, 0, 0, 0))
-
-        # check NAV_CONTROLLER_OUTPUT to determine when the waypoint distance has been truly reached
-        unreached = True
-        group_list = []
-        while unreached: # loop through wp_dist message until checkpoint confirmed reached by 15 wp_dist = 0s in group_list
-            msg = self.vehicle.recv_match(
-                type='NAV_CONTROLLER_OUTPUT', blocking=True)
-            
-            group_list.append(msg.wp_dist)
-            if len(group_list) == 10:
-                if sum(group_list) == 0:
-                    print("__waypoint reached__")
-                    unreached = False
-                else:
-                    group_list.clear()
-        time.sleep(0.5)
-
-    '''
-    Velocity Function: set copter's target velocity
-    Params: vel_x, vel_y, vel_z | positive = forward x, right y, down z
-    '''
-    def velocity(self, vel_x, vel_y, vel_z):
-        #print("velocity {:0.1f} {:0.1f} {:0.1f}".format(vel_x, vel_y, vel_z))
+    def velocity(self, vel_x: float, vel_y: float, vel_z: float) -> None:
+        '''
+        Velocity Function: set copter's target velocity
+            Positive values denotate forward x, right y, down z
+        Args: 
+            vel_x (float), vel_y (float), vel_z (float) | (x,y,z) vector velocities 
+        '''
+        # print("velocity {:0.1f} {:0.1f} {:0.1f}".format(vel_x, vel_y, vel_z))
 
         self.vehicle.mav.send(mavutil.mavlink.MAVLink_set_position_target_local_ned_message(10, self.vehicle.target_system, self.vehicle.target_component, mavutil.mavlink.MAV_FRAME_BODY_OFFSET_NED, int(0b10111000111), 0, 0, 0, vel_x, vel_y, vel_z, 0, 0, 0, 0, 0))
 
-    '''
-    Yaw Function: Change heading of the drone relative to itself or absolute to a compass
-    heading: degrees to turn (relative) or face (absolute)
-    rel: turn based on relative heading or absolute heading
-    clockwise: bool turn clockwise or counter clockwise based on current heading
-    '''
-    def yaw(self, heading, rel, clockwise):
-        # turn in direction relative to a drone, or absolute to a compass
-        if rel:
-            isRel = 1
-        else:
-            isRel = 0
-
-        # call command
-        if clockwise == 1:
-            print("Yaw {:0.1f} degrees clock-wise".format(heading))
-        else:
-            print("Yaw {:0.1f} degrees counter-clock-wise".format(heading))
+    def yaw(self, heading: float, rel: bool, clockwise: int) -> None:
+        '''
+        Yaw Function: Change heading of the drone relative to itself or absolute to a compass
+        Args: 
+            heading (float): degs to yaw (relative) or face (absolute)
+            rel (bool): yaw based on relative heading(1) or absolute heading(0)
+            clockwise (int): yaw clockwise(1) or counter clockwise(-1)
+        '''
+        print("Yaw to heading: {:0.1f}".format(heading))
+        # call velocity command
         self.vehicle.mav.command_long_send(self.vehicle.target_system, self.vehicle.target_component, 
-                                     mavutil.mavlink.MAV_CMD_CONDITION_YAW, 0, heading, 45, clockwise, isRel, 0, 0, 0)
+                                     mavutil.mavlink.MAV_CMD_CONDITION_YAW, 0, heading, 45, clockwise, rel, 0, 0, 0)
 
-    def print_ranges(self, subscriber):
-        usable_range_list = self.account_for_inf(subscriber)
-        # print range values formatted to approximate direction in unit circle
-        print("`````````````{:.2f}``````````````".format(usable_range_list[2]))
-        print("```{:.2f}``````````````{:.2f}`````".format(usable_range_list[1], usable_range_list[3]))
-        print("```````````````````````````````")
-        print("```````````````````````````````")
-        print("`{0:.2f}`````````C``````````{1:.2f}".format(usable_range_list[0], usable_range_list[4]))
-        print("```````````````````````````````")
-        print("```````````````````````````````")
-        print("```````````````````````````````")
-        print("`````````````{:.2f}``````````````".format(usable_range_list[5]))
-        
-    '''
-    change important range values to 10.0 if they are infinite
-    list is forrmatted [left, left_forward, forward, right_forward, right]
-    params: Subscriber - all of the Cartographer LaserScan parameters
-    '''
-    def account_for_inf(self, subscriber):
+    def compass_heading(self, yaw_num: float) -> float:
+        '''
+        Compass Heading: Calculate the desired heading absolute to a compass
+        Args: 
+            yaw_num (float): relative heading change (+num -> clockwise | -num -> counter-clockwise)
+        Return: 
+            self.heading (float): updated absolute heading, used as param for yaw() function
+        '''
+        # ensure output remains within 360deg compass range
+        if self.heading + yaw_num >= 360.0:
+            self.heading += yaw_num - 360.0
+        elif self.heading + yaw_num < 0.0:
+            self.heading += yaw_num + 360.0
+        else:
+            self.heading += yaw_num
+            
+        return self.heading
+
+    def account_for_inf(self, subscriber: Subscriber) -> list[(float)]:
+        '''
+        Account For Infinite: Change range_list[] values to 10.0 if they are infinite
+            List is forrmatted [left, left_forward, forward, right_forward, right]
+        Args: 
+            subscriber (Subscriber): all of the Cartographer LaserScan parameters
+        Return: 
+            usable_range_list (Array[(float)]): local list replacing inf -> 10.0
+        '''
         rclpy.spin_once(subscriber)
 
         usable_range_list = []
@@ -181,82 +158,93 @@ class Copter(object):
             if range_val == inf:
                 range_val = 10.0
             usable_range_list.append(range_val)
-        return usable_range_list # ranges without any inf values
+
+        return usable_range_list
     
-    '''
-    call continuous forward position until wall is reached 
-    params: Subscriber - all of the Cartographer LaserScan parameters
-    '''
-    def forward_until_snag(self, subscriber):
+    def display_ranges(self, usable_range_list: list[(float)]) -> None:
+        '''
+        Display Ranges: Output an instance of the account_for_inf() list in a formatted string
+        Args:
+            usable_range_list (list[(float)]): local list replacing inf -> 10.0
+        '''
+        print("`````````````{0:.2f}``````````````\n`````{1:.2f}```````````{2:.2f}``````\n```````````````````````````````\n```````````````````````````````\n```````````````````````````````\n`{3:.2f}`````````C``````````{4:.2f}\n```````````````````````````````\n```````````````````````````````\n```````````````````````````````\n`````````````{5:.2f}``````````````\n".format(usable_range_list[2], usable_range_list[1], usable_range_list[3], usable_range_list[0], usable_range_list[4], usable_range_list[5]))
+
+    def forward_until_snag(self, subscriber: Subscriber) -> None:
+        '''
+        Forward Until Snag: Move forward with a set velocity until stopping when a turn is required
+        Args: 
+            subscriber (Subscriber): all of the Cartographer LaserScan parameters
+        '''
         print("forward_until_snag function")
         usable_range_list = self.account_for_inf(subscriber)
-        self.print_ranges(subscriber)
 
         if self.hand_rule: # right-hand
-            # move until either forward wall hit or no longer hugging right wall
+            # pitch forward until either forward wall hit or no longer hugging right wall
             while usable_range_list[2] > WALL_DIST and usable_range_list[4] < WALL_DIST:
                 self.velocity(-1.0, 0.0, 0.0)
                 usable_range_list = self.account_for_inf(subscriber)
-                self.print_ranges(subscriber)
+                self.display_ranges(usable_range_list)
         else: # left-hand
-            # move until either forward wall hit or no longer hugging left wall
+            # pitch forward until either forward wall hit or no longer hugging left wall
             while usable_range_list[2] > WALL_DIST and usable_range_list[0] < WALL_DIST:
                 self.velocity(-1.0, 0.0, 0.0)
                 usable_range_list = self.account_for_inf(subscriber)
-                self.print_ranges(subscriber)
+                self.display_ranges(usable_range_list)
 
         self.velocity(0.0, 0.0, 0.0) # too close to wall, stop moving
 
-    '''
-    yaw in direction to keep hugging the right wall
-    params: Subscriber - all of the Cartographer LaserScan parameters
-    '''
-    def yaw_to_opening(self, subscriber):
-        # truth table: right-hand rule
-        # case 1: forward 0 and right 0
-        # case 2: forward 1 and right 1
-        # case 3: forward 0 and right 1 - unlikely / impossible
-        # replace right w/ left for left-hand rule
+    def yaw_to_opening(self, subscriber: Subscriber) -> None:
+        '''
+        Yaw to Opening: Yaw in direction to keep hugging the desired wall
+        Args: 
+            subscriber (Subscriber): all of the Cartographer LaserScan parameters
+        '''
+        # see writeup for truth_table
+        # key: {0: wall < WALL_DIST, 1: wall > WALL_DIST}
+        # case 1 -> 0 forward dir; 0 hand_rule dir
+        # case 2 -> 1 forward dir; 1 hand_rule dir
+        # case 3 -> 0 forward dir; 1 hand_rule dir
         print("yaw_to_open function")
         usable_range_list = self.account_for_inf(subscriber)
-        self.print_ranges(subscriber)
+        self.display_ranges(usable_range_list)
 
         if self.hand_rule: # right-hand
-            # 0 forward and 0 right -> yaw 90 deg counter_clockwise
+            # case 1 -> yaw compass_heading + 90 deg counter_clockwise
             if usable_range_list[2] < WALL_DIST and usable_range_list[4] < WALL_DIST:
-                self.yaw(90, 1, -1)
+                self.yaw(self.compass_heading(90.0*-1.0), 0, -1)
                 time.sleep(2.5)
                 return
-            # 1 forward and 1 right -> manually position around wall edge
+            # case 2 -> U-turn around wall edge
             elif usable_range_list[2] > WALL_DIST and usable_range_list[4] > WALL_DIST:
-                self.print_ranges(subscriber)
-                self.yaw(90, 1, 1) # yaw 90 deg clockwise
+                self.yaw(self.compass_heading(90.0*1.0), 0, 1) # yaw compass_heading + 90 deg clockwise
                 time.sleep(2.5)
                 return
-            else: # in between positions, turn around
-                self.print_ranges(subscriber)
-                self.yaw(180, 1, 1)
+            else: # case 3 -> yaw compass_heading + 180 clockwise
+                self.yaw(self.compass_heading(180.0*1.0), 0, 1)
                 time.sleep(4.5)
                 return
-        else:
-            # 0 forward and 0 left -> yaw 90 deg clockwise
+        else: # left-hand
+            # case 1 -> yaw compass_heading + 90 deg clockwise
             if usable_range_list[2] < WALL_DIST and usable_range_list[0] < WALL_DIST:
-                self.yaw(90, 1, 1)
+                self.yaw(self.compass_heading(90.0*1.0), 0,  1)
                 time.sleep(2.5)
                 return
-            # 1 forward and 1 left -> manually position around wall edge
+            # case 2 -> U-turn around wall edge
             if usable_range_list[2] > WALL_DIST and usable_range_list[0] > WALL_DIST:
-                self.print_ranges(subscriber)
-                self.yaw(90, 1, -1) # yaw 90 deg counter_clockwise
+                self.yaw(self.compass_heading(90.0*-1.0), 0, -1) # yaw compass_heading + 90 deg counter_clockwise
                 time.sleep(2.5)
                 return
-            else: # in between positions, turn around
-                self.print_ranges(subscriber)
-                self.yaw(180, 1, 1)
+            else: # case 3 -> yaw compass_heading + 180 clockwise
+                self.yaw(self.compass_heading(180.0*1.0), 0, 1)
                 time.sleep(4.5)
                 return
     
-    def escape_maze(self, subscriber):
+    def escape_maze(self, subscriber: Subscriber) -> None:
+        '''
+        Escape Maze: Navigate maze by continuously pitching and yawing, while hugging the left or right wall
+        Args: 
+            subscriber (Subscriber): all of the Cartographer LaserScan parameters
+        '''
         print("__running script__")
         try:
             while not self.stop_wander:
@@ -264,26 +252,27 @@ class Copter(object):
                 self.yaw_to_opening(subscriber)
                 time.sleep(1.5)
                 usable_range_list = self.account_for_inf(subscriber)
-                self.print_ranges(subscriber)
+                self.display_ranges(usable_range_list)
 
+                # needed to continue case 2 -> U-turn
                 if self.hand_rule:
-                    # there is a right wall to the robot's front right, so move a little forward so the right side lidar sees it
+                    # check if right wall is unseen by right lidar, but seen by forward_right
                     if usable_range_list[4] > 2.0 and usable_range_list[3] < 2.0:
-                        self.print_ranges(subscriber)
+                        # pitch forward until right lidar sees this wall 
                         while not usable_range_list[4] < WALL_DIST:
                             self.velocity(-1.0, 0.0, 0.0)
                             usable_range_list = self.account_for_inf(subscriber)
-                            self.print_ranges(subscriber)
+                            self.display_ranges(usable_range_list)
                 else:
-                    # there is a left wall to the robot's front left, so move a little forward so the left side lidar sees it
+                    # check if left wall is unseen by left lidar, but seen by forward_left
                     if usable_range_list[0] > 2.0 and usable_range_list[1] < 2.0:
-                        self.print_ranges(subscriber)
+                        # pitch forward until right lidar sees this wall
                         while not usable_range_list[0] < WALL_DIST:
                             self.velocity(-1.0, 0.0, 0.0)
                             usable_range_list = self.account_for_inf(subscriber)
-                            self.print_ranges(subscriber)
-                # move after yaw to not reenter yaw_to_opening function
-        except KeyboardInterrupt: # land copter when program is ended
+                            self.display_ranges(usable_range_list)
+
+        except KeyboardInterrupt: # land copter when program is manually ended
             self.stop_wander = True
             self.land()
         print("__exiting script__")
@@ -292,22 +281,32 @@ def main(args=None):
     rclpy.init(args=args)
     subscriber = Subscriber()
 
-    my_copter = Copter()
-    my_copter.initialize()
+    try:
+        my_copter = Copter()
+        my_copter.initialize()
+        my_copter.arm()
+        my_copter.takeoff(TAKEOFF_HEIGHT)
 
-    my_copter.hand_rule = int(input("Type '0' for left-hand rule, and '1' for right-hand rule: "))
-    while my_copter.hand_rule != 0 and my_copter.hand_rule != 1:
-        my_copter.hand_rule = int(input("(Input Error) Try Again, Type '0' for left-hand rule, and '1' for right-hand rule: "))
-    
-    if my_copter.hand_rule == 1: # right-hand rule
-        my_copter.yaw(180, 1, 1)
-        time.sleep(4.5)
-        my_copter.escape_maze(subscriber)
-    elif my_copter.hand_rule == 0: # left-hand rule
-        my_copter.yaw(90, 1, 1)
-        time.sleep(2.5)
-        my_copter.escape_maze(subscriber)
-    
+        my_copter.hand_rule = int(input("Type '0' for left-hand rule, and '1' for right-hand rule: "))
+        while my_copter.hand_rule != 0 and my_copter.hand_rule != 1:
+            my_copter.hand_rule = int(input("(Input Error) Try Again, Type '0' for left-hand rule, and '1' for right-hand rule: "))
+        
+        if not my_copter.stop_wander:
+            if my_copter.hand_rule == 1: # right-hand rule
+                my_copter.yaw(270.0, 0, -1)
+                my_copter.heading = 270.0
+                time.sleep(4.5)
+                my_copter.escape_maze(subscriber)
+            elif my_copter.hand_rule == 0: # left-hand rule
+                my_copter.yaw(180.0, 0, 1)
+                my_copter.heading = 180.0            
+                time.sleep(2.5)
+                my_copter.escape_maze(subscriber)
+    except KeyboardInterrupt: # abort launch
+        print("__COMMAND RECEIVED: ABANDONING LAUNCH__")
+        my_copter.stop_wander = True
+        my_copter.land()
+
     time.sleep(LAND_TIME)
     subscriber.destroy_node
 
