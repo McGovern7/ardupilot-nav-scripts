@@ -38,7 +38,7 @@ A basic diagram of the how the 2 scripts interact with Ardupilot’s Communicati
 
 ## 2.1 Visualising the Nav Process in the First Pass: [wanderer.py](../wanderer.py)
 
-1. Once Connection is established using PyMavlink commands and the Drone is hovering, call ```pos_script()```
+1. Once Connection is established using PyMavlink commands and the Drone is hovering, call ```wander_maze()```
 
 <div align="center">
   <img src="https://github.com/McGovern7/ardupilot-nav-scripts/assets/98053643/d8c5b569-250f-46ba-accb-059936c3ef0e"
@@ -62,7 +62,7 @@ A basic diagram of the how the 2 scripts interact with Ardupilot’s Communicati
 </div>
 
 4. Yaw in the direction closest to an opening, ensuring the copter does not pitch straight back into the same wall with some trig calculations.
-5. Exit function and return back to the while loop in ```pos_script()```, where once again ```forward_until_obstacle()``` and ```yaw_to_opening()``` are called in sequence until the user exits the program.
+5. Exit function and return back to the while loop in ```wander_maze()```, where once again ```forward_until_obstacle()``` and ```yaw_to_opening()``` are called in sequence until the user exits the program.
 
 ## 2.2 Visualising the Nav Process: [wall_follower.py](../wall_follower.py)
 
