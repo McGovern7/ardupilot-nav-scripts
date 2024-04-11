@@ -41,24 +41,24 @@ A basic diagram of the how the 2 scripts interact with Ardupilot’s Communicati
 1. Once Connection is established using PyMavlink commands and the Drone is hovering, call ```wander_maze()```
 
 <div align="center">
-  <img src="https://github.com/McGovern7/ardupilot-nav-scripts/assets/98053643/d8c5b569-250f-46ba-accb-059936c3ef0e"
+  <img src="https://github.com/McGovern7/ardupilot-nav-scripts/blob/main/writeup/Images/wander_maze.png"
     width="600"
     height="290"/>
 </div>
 
 2. Unless the program is quit, call ```forward_until_obstacle()```
 <div align="center">
-  <img src="https://github.com/McGovern7/ardupilot-nav-scripts/assets/98053643/0a377d07-0401-4f23-ad57-620daa47844f"
-    width="600"
-    height="200"/>
+  <img src="https://github.com/McGovern7/ardupilot-nav-scripts/blob/main/writeup/Images/fwd_until_obst.png"
+    width="620"
+    height="250"/>
 </div>
 
 3. While ```check_lidar()``` remains true, move forward indefinitely. Once ```check_lidar() = false``` (front LiDAR ranges too close), set
 ```velocity = 0``` and exit function, calling ```yaw_to_open()```
 <div align="center">
-  <img src="https://github.com/McGovern7/ardupilot-nav-scripts/assets/98053643/6c58fcbf-8bb0-4d86-89e9-278bd1e04a13"
+  <img src="https://github.com/McGovern7/ardupilot-nav-scripts/blob/main/writeup/Images/yaw_to_open.png"
     width="900"
-    height="500"/>
+    height="570"/>
 </div>
 
 4. Yaw in the direction closest to an opening, ensuring the copter does not pitch straight back into the same wall with some trig calculations.
