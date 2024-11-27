@@ -3,12 +3,13 @@
 </div>
 <div align="center">
   <img height="30px" width="auto" alt="ardupilot copter" src="https://img.shields.io/badge/Copter-space?label=Ardupilot&labelColor=%23dedede&color=%23fcd94c" />
-  <img height="30px" width="auto" alt="Python" src="https://img.shields.io/badge/-empty?logo=python&label=Python&labelColor=%23214868&color=%23ffde73" />
-  <img height="30px" width="auto" alt="ros 2 humble" src="https://img.shields.io/badge/Humble-humble?logo=ros&logoColor=%232980b9&label=ROS2&color=%232980b9" />
   <img height="30px" width="auto" alt="Ubuntu" src="https://img.shields.io/badge/v22.0.4-space?logo=ubuntu&label=Ubuntu&color=%23e95521" />
-  <img height="30px" width="auto" alt="pymavlink mavutil" src="https://img.shields.io/badge/mavutil-space?label=Pymavlink&color=%23ee6000" />
+<img height="30px" width="auto" alt="Python" src="https://img.shields.io/badge/-empty?logo=python&label=Python&labelColor=%23214868&color=%23ffde73" />
+  <img height="30px" width="auto" alt="ros 2 humble" src="https://img.shields.io/badge/Humble-humble?logo=ros&logoColor=%232980b9&label=ROS2&color=%232980b9" />
   <img height="30px" width="auto" alt="rclpy node" src="https://img.shields.io/badge/Node-space?label=rclpy&color=%232980b9" />
+  <img height="30px" width="auto" alt="pymavlink mavutil" src="https://img.shields.io/badge/mavutil-space?label=Pymavlink&color=%23ee6000" />
 </div>
+  
 
 Navigation Scripts to Maneuver an Ardupilot Copter, and map, through a Virtual Maze Environment using built in Odometry, GPS, and an integrated LiDAR.
 
